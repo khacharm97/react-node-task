@@ -18,8 +18,7 @@ import {
   PiListChecks,
   PiSignOutLight,
   PiTimerLight,
-  PiUserPlus,
-  PiWallet,
+  PiUserPlus
 } from "react-icons/pi";
 import { getNotifications } from "../../redux/action/notification";
 import { getTasks } from "../../redux/action/task";
@@ -285,7 +284,6 @@ const Navbar = ({ setShowSidebar, showSidebar, open, setOpen }) => {
                     <div className="text-lg font-primary">{loggedUser?.username}</div>
                     {loggedUser?.isWalletUser && (
                       <div className="text-xs text-green-600 flex items-center gap-1 ml-2">
-                        <PiWallet className="text-xs" />
                         Wallet User
                       </div>
                     )}
@@ -296,7 +294,7 @@ const Navbar = ({ setShowSidebar, showSidebar, open, setOpen }) => {
                     className="text-gray-600 flex items-center gap-4 font-primary">
                     {loggedUser?.isWalletUser ? (
                       <>
-                        <PiWallet className="text-xl" /> Disconnect Wallet
+                        Disconnect Wallet
                       </>
                     ) : (
                       <>

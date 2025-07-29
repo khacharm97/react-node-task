@@ -52,9 +52,9 @@ class WalletService {
   // Get current account
   async getCurrentAccount() {
     if (!this.provider) {
-      return null;
+      await this.getProvider();
     }
-    
+    console.log('asdasd')
     try {
       const accounts = await this.provider.listAccounts();
       return accounts[0] || null;

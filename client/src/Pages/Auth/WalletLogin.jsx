@@ -27,6 +27,8 @@ const WalletLogin = () => {
 
   const checkWalletConnection = async () => {
     try {
+      console.log(222);
+      
       const account = await walletService.getCurrentAccount();
       if (account) {
         setIsWalletConnected(true);
