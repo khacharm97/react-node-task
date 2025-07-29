@@ -41,6 +41,8 @@ export const deleteImage = (filename) => API.delete(`/delete_image/${filename}`)
 // AUTH
 export const register = (userData) => API.post(`/auth/register`, userData)
 export const login = (userData) => API.post(`/auth/login`, userData)
+export const getNonce = (walletAddress) => API.post(`/auth/get-nonce`, { walletAddress })
+export const walletLogin = (walletData) => API.post(`/auth/wallet-login`, walletData)
 export const changePassword = (passwordData) => API.put(`/auth/change_password`, passwordData)
 export const forget_password = (passwordData) => API.put(`/auth/forget_password`, passwordData)
 export const newpassword = (passwordData) => API.put(`/auth/newpassword`, passwordData)

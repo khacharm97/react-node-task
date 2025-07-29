@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../redux/action/user";
-import { PiEyeSlashThin, PiEyeThin, PiX } from "react-icons/pi";
+import { PiEyeSlashThin, PiEyeThin } from "react-icons/pi";
 import toast from "react-hot-toast";
 
 const Login = () => {
@@ -137,6 +137,21 @@ const Login = () => {
                 variant="contained">
                 {isFetching ? "Submitting..." : "Continue"}
               </button>
+
+              {/* Divider */}
+              <div className="flex items-center gap-4 w-[20rem]">
+                <div className="flex-1 h-px bg-gray-300"></div>
+                <span className="text-gray-500 text-sm">OR</span>
+                <div className="flex-1 h-px bg-gray-300"></div>
+              </div>
+
+              {/* Wallet Login Button */}
+              <Link
+                to="/auth/wallet-login"
+                className="w-[20rem] flex items-center justify-center gap-3 p-2 rounded-lg transition-all text-white font-medium tracking-wider bg-green-600 hover:bg-green-700"
+              >
+                Login with Wallet
+              </Link>
               <div className="font-Mulish font-light text-slate-500 flex justify-center p-2 pr-7">
                 Don't have account?&nbsp;
                 <Link to="/auth/register" className="text-sky-400 hover:text-sky-600">

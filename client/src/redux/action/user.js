@@ -2,6 +2,7 @@ import toast from 'react-hot-toast'
 import * as api from '../api'
 import { start, end, error, registerReducer, loginReducer, logoutReducer, getUserReducer, getClientsReducer, getUsersReducer, getEmployeesReducer, createClientReducer, createEmployeeReducer, updateUserReducer, deleteUserReducer, } from '../reducer/user'
 import Cookies from 'js-cookie'
+import walletService from '../../utils/walletService'
 
 export const register = (userData, navigate) => async (dispatch) => {
     try {
@@ -205,6 +206,81 @@ export const deleteUser = (userId) => async (dispatch) => {
         dispatch(end())
     } catch (err) {
         const message = err?.response?.data?.message || err?.message || "Something went wrong"
+        toast.error(message)
+        dispatch(error(err.message))
+    }
+}
+
+// Wallet login actions
+export const connectWallet = () => async (dispatch) => {
+    try {
+        dispatch(start())
+        const result = await walletService.connectWallet()
+        
+        if (result.success) {
+            dispatch(end())
+            return { success: true, account: result.account }
+        } else {
+            toast.error(result.error)
+            dispatch(error(result.error))
+            return { success: false, error: result.error }
+        }
+    } catch (err) {
+        const message = err?.message || "Failed to connect wallet"
+        toast.error(message)
+        dispatch(error(err.message))
+        return { success: false, error: message }
+    }
+}
+
+export const loginWithWallet = (account, navigate) => async (dispatch) => {
+    try {
+        dispatch(start())
+        
+        // Step 1: Get nonce from server
+        const nonceResponse = await api.getNonce(account)
+        const { nonce, message } = nonceResponse.data
+        // Step 2: Sign the message with MetaMask
+        const signature = await walletService.signMessage(message)
+        
+        // Step 3: Send signature to backend for verification
+        const walletData = {
+            walletAddress: account,
+            signature: signature,
+            message: message,
+            nonce: nonce,
+        }
+        
+        // Call the backend API
+        const { data } = await api.walletLogin(walletData)
+        const { token, ...result } = data.result
+        
+        // Store in cookies like regular login
+        Cookies.set('crm_profile', JSON.stringify(data.result))
+        dispatch(loginReducer(result))
+        navigate('/')
+        dispatch(end())
+        
+        toast.success('Successfully logged in with wallet!')
+        
+    } catch (err) {
+        const message = err?.response?.data?.message || err?.message || "Failed to login with wallet"
+        toast.error(message)
+        dispatch(error(err.message))
+    }
+}
+
+export const disconnectWallet = (navigate) => async (dispatch) => {
+    try {
+        dispatch(start())
+        walletService.disconnectWallet()
+        Cookies.remove('crm_profile')
+        dispatch(logoutReducer())
+        navigate('/auth/login')
+        dispatch(end())
+        toast.success('Wallet disconnected successfully')
+    } catch (err) {
+        const message = err?.message || "Failed to disconnect wallet"
         toast.error(message)
         dispatch(error(err.message))
     }

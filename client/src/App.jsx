@@ -10,6 +10,7 @@ import {
   Vouchers,
   Login,
   Register,
+  WalletLogin,
   CreateSale,
   User,
   Request,
@@ -63,6 +64,7 @@ const App = () => {
             <Routes>
               <Route exact path="/auth/register" element={<Register />} />
               <Route exact path="/auth/login" element={<Login />} />
+              <Route exact path="/auth/wallet-login" element={<WalletLogin />} />
               <Route exact path="/auth/forgot_password" element={<ForgotPassword />} />
               <Route exact path="/auth/newpassword" element={<ResetPassword />} />
               <Route exact path="/auth/forgot_password/enter_code" element={<InputCode />} />

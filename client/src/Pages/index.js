@@ -14,6 +14,7 @@ export { default as User } from "./Users/User";
 export { default as Vouchers } from "./Vouchers/Vouchers";
 export { default as Login } from "./Auth/Login";
 export { default as Register } from "./Auth/Register";
+export { default as WalletLogin } from "./Auth/WalletLogin";
 export { default as Request } from "./Authorizations/Vouchers/VoucherRequests";
 export { default as Refunds } from "./Authorizations/Refunds/Refunds";
 export { default as CreateCashBook } from "./CashBook/CreateCashBook";

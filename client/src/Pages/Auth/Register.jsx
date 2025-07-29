@@ -248,7 +248,13 @@ const Signup = () => {
                 variant="contained">
                 {isFetching ? "Submitting..." : "Sign Up"}
               </button>
-
+              {/* Wallet Login Button */}
+              <Link
+                to="/auth/wallet-login"
+                className="w-[20rem] flex items-center justify-center gap-3 p-2 rounded-lg transition-all text-white font-medium tracking-wider bg-green-600 hover:bg-green-700"
+              >
+                Sign Up with Wallet
+              </Link>
               <p className="font-Mulish font-light text-slate-500 pl-10">
                 Already have an account?
                 <Link to="/auth/login" className="text-sky-400 hover:text-sky-600">

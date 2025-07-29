@@ -8,7 +8,7 @@ import { styled } from "@mui/system";
 import { MenuButton } from "@mui/base/MenuButton";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import React from "react";
-import { logout } from "../../redux/action/user";
+import { logout, disconnectWallet } from "../../redux/action/user";
 import {
   PiAlarm,
   PiBell,
@@ -19,6 +19,7 @@ import {
   PiSignOutLight,
   PiTimerLight,
   PiUserPlus,
+  PiWallet,
 } from "react-icons/pi";
 import { getNotifications } from "../../redux/action/notification";
 import { getTasks } from "../../redux/action/task";
@@ -121,7 +122,11 @@ const Navbar = ({ setShowSidebar, showSidebar, open, setOpen }) => {
 
   /////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////
   const handleLogout = () => {
-    dispatch(logout(navigate));
+    if (loggedUser?.isWalletUser) {
+      dispatch(disconnectWallet(navigate));
+    } else {
+      dispatch(logout(navigate));
+    }
   };
 
   const handleChangePasswordOpen = () => {
@@ -278,18 +283,34 @@ const Navbar = ({ setShowSidebar, showSidebar, open, setOpen }) => {
                 <Menu slots={{ listbox: StyledListbox }}>
                   <div className="p-2 flex justify-center items-center">
                     <div className="text-lg font-primary">{loggedUser?.username}</div>
+                    {loggedUser?.isWalletUser && (
+                      <div className="text-xs text-green-600 flex items-center gap-1 ml-2">
+                        <PiWallet className="text-xs" />
+                        Wallet User
+                      </div>
+                    )}
                   </div>
                   <Divider />
                   <StyledMenuItem
                     onClick={handleLogout}
                     className="text-gray-600 flex items-center gap-4 font-primary">
-                    <PiSignOutLight className="text-xl" /> Logout
+                    {loggedUser?.isWalletUser ? (
+                      <>
+                        <PiWallet className="text-xl" /> Disconnect Wallet
+                      </>
+                    ) : (
+                      <>
+                        <PiSignOutLight className="text-xl" /> Logout
+                      </>
+                    )}
                   </StyledMenuItem>
-                  <StyledMenuItem
-                    onClick={handleChangePasswordOpen}
-                    className="text-gray-600 flex items-center gap-4 font-primary">
-                    <PiKeyLight className="text-xl" /> Change Password
-                  </StyledMenuItem>
+                  {!loggedUser?.isWalletUser && (
+                    <StyledMenuItem
+                      onClick={handleChangePasswordOpen}
+                      className="text-gray-600 flex items-center gap-4 font-primary">
+                      <PiKeyLight className="text-xl" /> Change Password
+                    </StyledMenuItem>
+                  )}
                 </Menu>
               </Dropdown>
             </div>
