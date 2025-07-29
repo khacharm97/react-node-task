@@ -54,7 +54,6 @@ class WalletService {
     if (!this.provider) {
       await this.getProvider();
     }
-    console.log('asdasd')
     try {
       const accounts = await this.provider.listAccounts();
       return accounts[0] || null;
