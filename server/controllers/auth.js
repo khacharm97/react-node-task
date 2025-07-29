@@ -8,6 +8,9 @@ import jwt from 'jsonwebtoken'
 import nodemailer from "nodemailer"
 import otpGenerator from 'otp-generator'
 import Lead from '../models/lead.js'
+import { ethers } from 'ethers'
+
+const nonceStore = new Map();
 
 export const register = async (req, res, next) => {
     try {
@@ -170,4 +173,56 @@ export const setNewPassword = async (req, res) => {
     catch (error) {
         res.status(404).json({ message: 'error in changePassword - controllers/user.js', error, success: false })
     }
+}
+
+// Wallet login controller
+export const walletLogin = async (req, res, next) => {
+    try {
+        const { walletAddress, signature, message } = req.body;
+        const recoveredAddress = ethers.utils.verifyMessage(message, signature);
+        if (recoveredAddress.toLowerCase() !== walletAddress.toLowerCase()) {
+            return res.status(401).json({ error: 'Signature verification failed' });
+        }
+        const storedNonce = nonceStore.get(walletAddress);
+        const expectedMessage = `Sign in to Test nonce: ${storedNonce}`;
+        if (message !== expectedMessage) {
+            return res.status(401).json({ error: 'Invalid message' });
+        }
+        nonceStore.delete(walletAddress);
+        let user = await User.findOne({ walletAddress: walletAddress.toLowerCase() });
+        if (!user) {
+            const username = `wallet_${walletAddress.slice(2, 10)}`;
+            user = await User.create({
+                username: username,
+                role: 'client',
+                walletAddress: walletAddress.toLowerCase(),
+                isWalletUser: true
+            });
+        }
+
+        // Generate JWT token
+        const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET);
+
+        res.status(201).json({ 
+            result: { ...user._doc, token }, 
+            message: 'Wallet login successful', 
+            success: true 
+        });
+
+    } catch (err) {
+        next(createError(500, err.message));
+    }
+};
+export const getnonce = async (req, res, next) => {
+    const { walletAddress } = req.body;
+    
+    if (!ethers.utils.isAddress(walletAddress)) {
+        return res.status(400).json({ error: 'Invalid Ethereum address' });
+    }
+    
+    // Generate a random nonce
+    const nonce = Math.floor(Math.random() * 1000000).toString();
+    nonceStore.set(walletAddress, nonce);
+    
+    res.json({ nonce, message: `Sign in to Test nonce: ${nonce}` });
 }

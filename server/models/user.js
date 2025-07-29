@@ -5,13 +5,15 @@ const userSchema = Schema({
     password: { type: String, required: false, },
     firstName: { type: String, required: false },
     lastName: { type: String, required: false },
-    username: { type: String, required: true },
-    phone: { type: String, required: true },
+    username: { type: String, required: false },
+    phone: { type: String, required: false },
     city: { type: String, required: false },
     CNIC: { type: String, required: false },
     email: { type: String, required: false, default: '' },
     role: { type: String, required: true, default: 'client', enum: ['client', 'employee', 'manager', 'super_admin'] },
     uid: { type: String },
+    walletAddress: { type: String, required: false, unique: true, sparse: true },
+    isWalletUser: { type: Boolean, default: false },
 }, { timestamps: true })
 
 
