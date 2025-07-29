@@ -11,13 +11,57 @@ const WalletLogin = () => {
   const { isFetching } = useSelector((state) => state.user);
 
   const [isMetaMaskInstalled, setIsMetaMaskInstalled] = useState(false);
+  const [isMetaMaskUnlocked, setIsMetaMaskUnlocked] = useState(false);
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [connectedAccount, setConnectedAccount] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
     checkMetaMaskInstallation();
+    checkMetaMaskUnlockStatus();
     checkWalletConnection();
+
+    // Listen for MetaMask account changes
+    const handleAccountsChanged = (accounts) => {
+      if (accounts.length === 0) {
+        // MetaMask is locked or no accounts
+        setIsMetaMaskUnlocked(false);
+        setIsWalletConnected(false);
+        setConnectedAccount("");
+      } else {
+        // MetaMask is unlocked and has accounts
+        setIsMetaMaskUnlocked(true);
+        setConnectedAccount(accounts[0]);
+        setIsWalletConnected(true);
+      }
+    };
+
+    // Listen for MetaMask connection status changes
+    const handleConnect = (connectInfo) => {
+      checkMetaMaskUnlockStatus();
+    };
+
+    // Listen for MetaMask disconnect
+    const handleDisconnect = (error) => {
+      setIsMetaMaskUnlocked(false);
+      setIsWalletConnected(false);
+      setConnectedAccount("");
+    };
+
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      window.ethereum.on('connect', handleConnect);
+      window.ethereum.on('disconnect', handleDisconnect);
+    }
+
+    // Cleanup listeners
+    return () => {
+      if (window.ethereum) {
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        window.ethereum.removeListener('connect', handleConnect);
+        window.ethereum.removeListener('disconnect', handleDisconnect);
+      }
+    };
   }, []);
 
   const checkMetaMaskInstallation = () => {
@@ -25,9 +69,26 @@ const WalletLogin = () => {
     setIsMetaMaskInstalled(installed);
   };
 
+  const checkMetaMaskUnlockStatus = async () => {
+    try {
+      const unlocked = await walletService.isMetaMaskUnlocked();
+      setIsMetaMaskUnlocked(unlocked);
+      
+      // If MetaMask is unlocked, get the current account
+      if (unlocked) {
+        const account = await walletService.getCurrentMetaMaskAccount();
+        if (account) {
+          setConnectedAccount(account);
+          setIsWalletConnected(true);
+        }
+      }
+    } catch (error) {
+      console.error("Error checking MetaMask unlock status:", error);
+    }
+  };
+
   const checkWalletConnection = async () => {
     try {
-      
       const account = await walletService.getCurrentAccount();
       if (account) {
         setIsWalletConnected(true);
@@ -92,6 +153,7 @@ const WalletLogin = () => {
             <p className="text-xl text-slate-500 tracking-wide flex justify-center pt-8">
               Connect Your Wallet
             </p>
+
             
             <div className="flex flex-col gap-6 w-auto pl-[2rem] pt-[2rem] pr-[2rem]">
               
@@ -116,7 +178,7 @@ const WalletLogin = () => {
               )}
 
               {/* Connect Wallet Button */}
-              {isMetaMaskInstalled && !isWalletConnected && (
+              {isMetaMaskInstalled && !isMetaMaskUnlocked  && (
                 <button
                   onClick={handleConnectWallet}
                   disabled={isConnecting}

@@ -12,6 +12,37 @@ class WalletService {
     return typeof window !== 'undefined' && window.ethereum && window.ethereum.isMetaMask;
   }
 
+  // Check if MetaMask is unlocked (user is logged in)
+  async isMetaMaskUnlocked() {
+    if (!this.isMetaMaskInstalled()) {
+      return false;
+    }
+
+    try {
+      // Check if MetaMask is unlocked by trying to get accounts
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      return accounts && accounts.length > 0;
+    } catch (error) {
+      console.error('Error checking MetaMask unlock status:', error);
+      return false;
+    }
+  }
+
+  // Get current MetaMask account if unlocked
+  async getCurrentMetaMaskAccount() {
+    if (!this.isMetaMaskInstalled()) {
+      return null;
+    }
+
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      return accounts && accounts.length > 0 ? accounts[0] : null;
+    } catch (error) {
+      console.error('Error getting current MetaMask account:', error);
+      return null;
+    }
+  }
+
   // Get MetaMask provider
   async getProvider() {
     if (!this.isMetaMaskInstalled()) {
@@ -52,7 +83,9 @@ class WalletService {
   // Get current account
   async getCurrentAccount() {
     if (!this.provider) {
-      await this.getProvider();
+        if(this.isMetaMaskUnlocked){
+            return null;
+        }
     }
     try {
       const accounts = await this.provider.listAccounts();
@@ -83,7 +116,7 @@ By signing this message, you confirm that you are the owner of this wallet addre
   // Sign a message for authentication
   async signMessage(message) {
     if (!this.signer) {
-      throw new Error('Wallet not connected');
+      await this.connectWallet();
     }
 
     try {
